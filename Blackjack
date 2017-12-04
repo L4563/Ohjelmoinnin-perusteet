@@ -1,10 +1,276 @@
 //BlackJack
 
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+#include <Windows.h>
+
 using namespace std;
+void menu();
+int pelaajallekortti(int *luku);
+int jakajallekortti(int *luku, bool vakuutus);
+void tilanne(int *pelaaja, int *jakaja);
 
-int main ()
+/*
+void uusipelaaja(PELAAJA *i);
+int Valikko(void);*/
+
+struct PELAAJA
 {
+	string nimi;
+	int rahat;
+};
 
+struct ARVO
+{
+	int pata[13] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 10, 10 };
+	int ruutu[13] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10 };
+	int hertta[13] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10 };
+	int risti[13] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10 };
+};
+
+struct MAAT
+{
+	string maa[4] = { "PATA", "RUUTU", "HERTTA", "RISTI" };
+};
+
+struct NIMI
+{
+	string arvo[13] = {
+		"ÄSSÄN",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+		"10",
+		"JÄTKÄN",
+		"KUNINGATTAREN",
+		"KUNINKAAN" };
+};
+
+
+
+
+
+int main()
+{
+	int uusipeli;
+
+	srand(time(NULL));
+
+	while (uusipeli = 1)
+	{
+		cout << "Haluaisitko pelata blackjackkia? (1 - kyllä, 2 - En)";
+		cin >> uusipeli;
+		if (uusipeli == 1)
+		{
+			menu();
+		}
+		else
+		{
+			cout << ":(";
+		}
+	}
+	return 0;
+}
+
+void menu()
+{
+	PELAAJA pelaajat[50];
+	int pelaajanumero = 0;
+	int menu;
+	int panos = 10;
+
+	cout << "Kerro nimesi: ";
+	cin >> pelaajat[pelaajanumero].nimi;
+	cout << endl << "Paljonko rahaa sinulla on: ";
+	cin >> pelaajat[pelaajanumero].rahat;
+
+
+	cout << "\nVALIKKO" << endl;
+	cout << "0 Lopeta" << endl;
+	cout << "1 Aloita peli" << endl;
+	cout << "2 Vaihdapelaajaa" << endl;
+	cout << "3 Nayta pelaajan tiedot" << endl;
+	cout << "4 Poista pelaajan tiedot" << endl;
+	cout << "5 Tallenna pelaajan tiedot tiedostoon" << endl;
+	cout << "6 Hae pelaajan tiedot tiedostosta\n\n" << endl;
+
+	cin >> menu;
+
+	while (pelaajat[pelaajanumero].rahat > 0)
+	{
+		switch (menu)
+		{
+		case 0:
+			break;
+		case 1:
+			int valinta;
+
+			cout << "\nVALIKKO" << endl;
+			cout << "Panos on: " << panos << "€" << endl;
+			cout << "0 Poistu" << endl;
+			cout << "1 Jaa kortit" << endl;
+			cout << "2 muuta panosta" << endl;
+
+			cin >> valinta;
+
+			if (valinta == 0)
+			{
+				break;
+			}
+
+			if (valinta == 1)
+			{
+				NIMI kortti;
+				ARVO pelikortit;
+				int pelaajakasi = 0;
+				int jakajakasi = 0;
+				bool vakuutus = false;
+
+				for (int i = 0; i <= 1; i++) //Jaetaan pelaajalle 2 korttia
+				{
+					pelaajallekortti(&pelaajakasi);
+				}
+				jakajallekortti(&jakajakasi, vakuutus);	//Jaetaan Jakajalle kortti
+				tilanne(&pelaajakasi, &jakajakasi); // kerrotaan tämänhetkinen tilanne
+
+				if (pelaajakasi < 12 && pelaajakasi > 8) // Jos pelaajien korttien yhteenlaskettu arvo on väliltä 9-11, pelaaja voi tuplata.
+				{
+					cout << "1. Uusi kortti" << endl;
+					cout << "2. Stand" << endl;
+					cout << "3. Tuplaa" << endl;
+					cout << "4. Luovuta" << endl;
+
+					cin >> valinta;
+
+					if (valinta == 1) //Uusi kortti pelaajalle.
+					{
+						pelaajallekortti(&pelaajakasi);
+						if (pelaajakasi == 21) //Jos tulos on 21 niin pelaaja voittaa
+						{
+							cout << "BLACKJACK!!!!";
+							pelaajat[pelaajanumero].rahat = pelaajat[pelaajanumero].rahat + panos;
+							break;
+						}
+						else if (pelaajakasi > 21) //Jos tulos on yli 21 niin pelaaja häviää
+						{
+							cout << "BUSTED!!!";
+							pelaajat[pelaajanumero].rahat = pelaajat[pelaajanumero].rahat - panos;
+							break;
+						}
+					}
+					else if (valinta == 2) //Odotetaan jakajaa
+					{
+						jakajallekortti(&jakajakasi, vakuutus);
+						int tekoaly = rand() % 100;
+
+						if (jakajakasi <= 10)
+						{
+							jakajallekortti(&jakajakasi, vakuutus);
+						}
+						else if (pelaajakasi == 20)
+						{
+							jakajallekortti(&jakajakasi, vakuutus);
+						}
+						else if (pelaajakasi <= 18 && tekoaly > 20)
+						{
+							jakajallekortti(&jakajakasi, vakuutus);
+						}
+						else if (pelaajakasi <= 16 && tekoaly > 40)
+						{
+							jakajallekortti(&jakajakasi, vakuutus);
+						}
+
+
+					}
+					else if (valinta == 3) //Tuplataan
+					{
+
+					}
+				}
+			}
+			else if (valinta == 2)
+			{
+				cout << "Anna uusi panos: ";
+				cin >> panos;
+			}
+			continue;
+		default:
+			break;
+		}
+	}
+}
+
+int pelaajallekortti(int *luku)
+{
+	NIMI kortti;
+	ARVO pelikortit;
+	MAAT maannimi;
+
+	int vari = rand() % 3; // arvotaan kortin väri
+	int kortinnumero = rand() % 13; // arvotaan kortti
+
+	cout << "\nPelaaja sai " << maannimi.maa[vari] << " " << kortti.arvo[kortinnumero] << endl;
+	*luku = *luku + pelikortit.pata[kortinnumero];
+	Sleep(1000);
+
+	return *luku;
+}
+
+int jakajallekortti(int *luku, bool vakuutus)
+{
+	NIMI kortti;
+	ARVO pelikortit;
+	MAAT maannimi;
+
+	int vari = rand() % 3;
+	int kortinnumero = rand() % 13;
+
+	cout << "\nJakaja sai " << maannimi.maa[vari] << " " << kortti.arvo[kortinnumero] << endl;
+	*luku = *luku + pelikortit.pata[kortinnumero];
+	Sleep(1000);
+	if (kortti.arvo == 0)
+	{
+		vakuutus = true;
+	}
+	return *luku, vakuutus;
+}
+
+void tilanne(int *pelaaja, int *jakaja)
+{
+	cout << "\nPelaajan korttien arvo on: " << *pelaaja << endl;
+	cout << "\nJakajan korttien arvo on: " << *jakaja << endl;
+}
+
+
+
+
+/*
+void uusipelaaja(PELAAJA *i)
+{
+cout << "tervetuloa pelaamaan Blackjackkia!\n\n Miksi kutsumme sinua: ";
+cin >> *i.nimi;
+cout << "Paljonko rahaa aiot laittaa sisään";
+cin >> *i.rahat;
+}
+
+int Valikko()
+{
+cout << "VALIKKO" << endl;
+cout << "0 Lopeta" << endl;
+cout << "1 Aloita peli" << endl;
+cout << "2 Vaihdapelaajaa" << endl;
+cout << "3 Nayta pelaajan tiedot" << endl;
+cout << "4 Poista pelaajan tiedot" << endl;
+cout << "5 Tallenna pelaajan tiedot tiedostoon" << endl;
+cout << "6 Hae pelaajan tiedot tiedostosta\n" << endl;
 return 0;
 }
+*/
+
